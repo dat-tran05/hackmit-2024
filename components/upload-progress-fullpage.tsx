@@ -148,7 +148,7 @@ const UploadProgressFullpage: React.FC<Props> = ({ file, resetPage }) => {
         console.warn(`file type (${_file.type}) does not look like video!`);
         resolve();
       }
-
+      
       const video = document.createElement('video');
       video.preload = 'metadata';
       video.onloadedmetadata = function () {

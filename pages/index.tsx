@@ -17,7 +17,7 @@ type ChunkInfo = {
   size: number;
   uploadStarted: number;
   uploadFinished?: number;
-}
+};
 
 type UploadTelemetry = {
   fileSize: number;
@@ -33,7 +33,9 @@ const Index: React.FC<Props> = () => {
   const [uploadId, setUploadId] = useState<string>('');
   const [isPreparing, setIsPreparing] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>('');
-  const [uploadAnalytics, setUploadAnalytics] = useState<Partial<UploadTelemetry> & Pick<UploadTelemetry, 'chunks'>>({ chunks: []});
+  const [uploadAnalytics, setUploadAnalytics] = useState<
+    Partial<UploadTelemetry> & Pick<UploadTelemetry, 'chunks'>
+  >({ chunks: [] });
 
   const { data } = useSwr(
     () => (isPreparing ? `/api/uploads/${uploadId}` : null),
@@ -74,7 +76,9 @@ const Index: React.FC<Props> = () => {
     setUploadAnalytics(initialUploadAnalytics);
   };
 
-  const handleChunkAttempt: MuxUploaderProps['onChunkAttempt'] = ({ detail }) => {
+  const handleChunkAttempt: MuxUploaderProps['onChunkAttempt'] = ({
+    detail,
+  }) => {
     const chunks: ChunkInfo[] = [...uploadAnalytics.chunks];
     chunks[detail.chunkNumber] = {
       size: detail.chunkSize,
@@ -87,7 +91,9 @@ const Index: React.FC<Props> = () => {
     });
   };
 
-  const handleChunkSuccess: MuxUploaderProps['onChunkSuccess'] = ({ detail }) => {
+  const handleChunkSuccess: MuxUploaderProps['onChunkSuccess'] = ({
+    detail,
+  }) => {
     const chunks = [...uploadAnalytics.chunks];
     chunks[detail.chunk].uploadFinished = Date.now();
     chunks[detail.chunk].size = detail.chunkSize;
@@ -99,7 +105,7 @@ const Index: React.FC<Props> = () => {
   };
 
   const handleSuccess: MuxUploaderProps['onSuccess'] = () => {
-    const finalAnalytics = {...uploadAnalytics};
+    const finalAnalytics = { ...uploadAnalytics };
     finalAnalytics.uploadFinished = Date.now();
 
     fetch('/api/telemetry', {
@@ -110,7 +116,7 @@ const Index: React.FC<Props> = () => {
       body: JSON.stringify({
         type: 'upload',
         data: finalAnalytics,
-      })
+      }),
     });
 
     setIsPreparing(true);
@@ -131,27 +137,26 @@ const Index: React.FC<Props> = () => {
   if (errorMessage) {
     return (
       <Layout>
-        <div style={{ paddingBottom: '20px'}}><h1>{errorMessage}</h1></div>
+        <div style={{ paddingBottom: '20px' }}>
+          <h1>{errorMessage}</h1>
+        </div>
         <div>
           <Button onClick={Router.reload}>Reset</Button>
         </div>
       </Layout>
     );
   }
- 
 
   return (
-    <Layout
-      dragActive
-      isUploading={isUploading}
-    >
-      <div className='wrapper'>
+    <Layout dragActive isUploading={isUploading}>
+      <div className="bg-red-300 w-full min-h-screen"> HELLO MONKEY </div>
+      <div className="wrapper">
         {!isUploading ? (
           <div>
             <h1>Add a video.</h1>
             <h1>Get a shareable link to stream it.</h1>
           </div>
-          ) : null}
+        ) : null}
         <div className={isUploading ? '' : 'cta'}>
           {!isUploading ? (
             <div className="drop-notice">
@@ -167,95 +172,103 @@ const Index: React.FC<Props> = () => {
             onSuccess={handleSuccess}
             dynamicChunkSize={isDynamicChunkSizeSet}
             endpoint={createUpload}
-            style={{ fontSize: isUploading ? '4vw': '26px' }}
+            style={{ fontSize: isUploading ? '4vw' : '26px' }}
           >
-            <Button className={isUploading ? 'hidden' : '' } slot="file-select">Upload video</Button>
+            <Button className={isUploading ? 'hidden' : ''} slot="file-select">
+              Upload video
+            </Button>
           </MuxUploader>
-        {!isUploading ? (
-          <>
-            <div className="cta-record">
-              <Link href="/record?source=camera"><Button>Record from camera</Button></Link>
-            </div>
-            <div className="cta-record">
-              <Link href="/record?source=screen"><Button>Record my screen</Button></Link>
-            </div>
-          </>
-        ) : null}
+          {!isUploading ? (
+            <>
+              <div className="cta-record">
+                <Link href="/record?source=camera">
+                  <Button>Record from camera</Button>
+                </Link>
+              </div>
+              <div className="cta-record">
+                <Link href="/record?source=screen">
+                  <Button>Record my screen</Button>
+                </Link>
+              </div>
+            </>
+          ) : null}
         </div>
       </div>
-      <style jsx>{`
-        .wrapper {
-          display: flex;
-          flex-direction: column;
-          justify-content: space-between;
-          height: 100%;
-          width: ${isUploading ? '100%' : 'auto'};
-        }
-        input {
-          display: none;
-        }
-        .drop-notice {
-          display: none;
-        }
-
-        .cta {
-          display: flex;
-          flex-direction: column;
-          align-items: flex-end;
-          justify-content: flex-end;
-          margin-right: 15px;
-        }
-        .cta .button {
-          margin: 8px 0;
-        }
-
-        .cta {
-          margin-top: 30px;
-          display: flex;
-          flex-direction: column;
-        }
-        .cta-text-mobile {
-          display: inline-block;
-        }
-        .cta-text-desktop {
-          display: none;
-        }
-        .cta-record {
-          display: none;
-        }
-
-        @media only screen and (min-width: ${breakpoints.md}px) {
-          .cta-record {
-            display: block;
-            margin-top: 15px;
+      <style jsx>
+        {`
+          .wrapper {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 100%;
+            width: ${isUploading ? '100%' : 'auto'};
           }
-          .drop-notice {
-            display: block;
-            text-align: right;
-            float: right;
-            color: #fff;
-            margin-bottom: 5px;
-            opacity: 0.5;
-            mix-blend-mode: exclusion;
-          }
-          .drop-notice h2 {
-            margin-top: 0;
-          }
-
-          .cta-text-mobile {
+          input {
             display: none;
           }
-          .cta-text-desktop {
+          .drop-notice {
+            display: none;
+          }
+
+          .cta {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            justify-content: flex-end;
+            margin-right: 15px;
+          }
+          .cta .button {
+            margin: 8px 0;
+          }
+
+          .cta {
+            margin-top: 30px;
+            display: flex;
+            flex-direction: column;
+          }
+          .cta-text-mobile {
             display: inline-block;
           }
-        }
-      `}
+          .cta-text-desktop {
+            display: none;
+          }
+          .cta-record {
+            display: none;
+          }
+
+          @media only screen and (min-width: ${breakpoints.md}px) {
+            .cta-record {
+              display: block;
+              margin-top: 15px;
+            }
+            .drop-notice {
+              display: block;
+              text-align: right;
+              float: right;
+              color: #fff;
+              margin-bottom: 5px;
+              opacity: 0.5;
+              mix-blend-mode: exclusion;
+            }
+            .drop-notice h2 {
+              margin-top: 0;
+            }
+
+            .cta-text-mobile {
+              display: none;
+            }
+            .cta-text-desktop {
+              display: inline-block;
+            }
+          }
+        `}
       </style>
-      <style jsx global>{`
-        mux-uploader::part(progress-percentage) {
-          align-items: flex-start;
-        }
-      `}
+      <style jsx global>
+        {`
+          mux-uploader::part(progress-percentage) {
+            align-items: flex-start;
+          }
+        `}
       </style>
     </Layout>
   );
